@@ -1,0 +1,6 @@
+{
+  "name": "BALBEC - Delivery & Autoatendimento Salgados",
+  "description": "Sistema completo de delivery, totem de autoatendimento e painel administrativo para a franquia BALBEC Salgados com integração BlueFocus.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

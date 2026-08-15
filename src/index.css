@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --theme-bg: #f8f9fa;
+    --theme-card-bg: #ffffff;
+    --theme-text-primary: #2d3436;
+    --theme-text-secondary: #636e72;
+    --theme-accent: #f59e0b;
+    --theme-accent-hover: #d97706;
+    --theme-accent-text: #020617;
+    --theme-border: #e9ecef;
+    --theme-radius: 1.25rem;
+    --theme-badge-bg: #fef3c7;
+    --theme-badge-text: #d97706;
+  }
+
+  /* Layout 2: Gourmet Dark Industrial */
+  [data-layout="dark-industrial"] {
+    --theme-bg: #090a0f;
+    --theme-card-bg: #13151b;
+    --theme-text-primary: #f8fafc;
+    --theme-text-secondary: #94a3b8;
+    --theme-accent: #f59e0b;
+    --theme-accent-hover: #fbbf24;
+    --theme-accent-text: #020617;
+    --theme-border: #27272a;
+    --theme-radius: 0.75rem;
+    --theme-badge-bg: #27272a;
+    --theme-badge-text: #fbbf24;
+  }
+
+  [data-layout="dark-industrial"] header,
+  [data-layout="dark-industrial"] .bg-white {
+    background-color: #13151b !important;
+    color: #f8fafc !important;
+    border-color: #27272a !important;
+  }
+
+  [data-layout="dark-industrial"] .text-\[\#2D3436\] {
+    color: #f8fafc !important;
+  }
+
+  [data-layout="dark-industrial"] .text-\[\#636E72\] {
+    color: #94a3b8 !important;
+  }
+
+  [data-layout="dark-industrial"] .bg-\[\#F8F9FA\] {
+    background-color: #0d0f14 !important;
+    border-color: #27272a !important;
+  }
+
+  [data-layout="dark-industrial"] .border-\[\#E9ECEF\] {
+    border-color: #27272a !important;
+  }
+
+  [data-layout="dark-industrial"] input {
+    background-color: #1a1d26 !important;
+    color: #ffffff !important;
+    border-color: #3f3f46 !important;
+  }
+
+  /* Layout 3: B2B Atacado / High-Density Grid */
+  [data-layout="b2b-atacado"] {
+    --theme-bg: #f1f5f9;
+    --theme-card-bg: #ffffff;
+    --theme-text-primary: #0f172a;
+    --theme-text-secondary: #475569;
+    --theme-accent: #0284c7;
+    --theme-accent-hover: #0369a1;
+    --theme-accent-text: #ffffff;
+    --theme-border: #cbd5e1;
+    --theme-radius: 0.5rem;
+    --theme-badge-bg: #e0f2fe;
+    --theme-badge-text: #0369a1;
+  }
+
+  [data-layout="b2b-atacado"] .bg-\[\#F59E0B\] {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+  }
+
+  [data-layout="b2b-atacado"] .text-\[\#D97706\],
+  [data-layout="b2b-atacado"] .text-\[\#F59E0B\] {
+    color: #0284c7 !important;
+  }
+
+  [data-layout="b2b-atacado"] .bg-\[\#FEF3C7\] {
+    background-color: #e0f2fe !important;
+    border-color: #bae6fd !important;
+    color: #0369a1 !important;
+  }
+
+  [data-layout="b2b-atacado"] .border-\[\#FDE68A\] {
+    border-color: #bae6fd !important;
+  }
+
+  /* Layout 4: Artisan Bistro / Terracotta Minimalist */
+  [data-layout="artisan-bistro"] {
+    --theme-bg: #faf7f2;
+    --theme-card-bg: #ffffff;
+    --theme-text-primary: #292524;
+    --theme-text-secondary: #78716c;
+    --theme-accent: #c2410c;
+    --theme-accent-hover: #9a3412;
+    --theme-accent-text: #ffffff;
+    --theme-border: #e7e5e4;
+    --theme-radius: 1.5rem;
+    --theme-badge-bg: #ffedd5;
+    --theme-badge-text: #c2410c;
+  }
+
+  [data-layout="artisan-bistro"] .bg-\[\#F59E0B\] {
+    background-color: #c2410c !important;
+    color: #ffffff !important;
+  }
+
+  [data-layout="artisan-bistro"] .text-\[\#D97706\],
+  [data-layout="artisan-bistro"] .text-\[\#F59E0B\] {
+    color: #c2410c !important;
+  }
+
+  [data-layout="artisan-bistro"] .bg-\[\#FEF3C7\] {
+    background-color: #ffedd5 !important;
+    border-color: #fed7aa !important;
+    color: #c2410c !important;
+  }
+
+  [data-layout="artisan-bistro"] .border-\[\#FDE68A\] {
+    border-color: #fed7aa !important;
+  }
+
+  /* Layout 5: Ultra Fast-Food Retro / Vibrante */
+  [data-layout="fast-food-retro"] {
+    --theme-bg: #fffbf0;
+    --theme-card-bg: #ffffff;
+    --theme-text-primary: #18181b;
+    --theme-text-secondary: #52525b;
+    --theme-accent: #dc2626;
+    --theme-accent-hover: #b91c1c;
+    --theme-accent-text: #ffffff;
+    --theme-border: #fecaca;
+    --theme-radius: 1rem;
+    --theme-badge-bg: #fee2e2;
+    --theme-badge-text: #dc2626;
+  }
+
+  [data-layout="fast-food-retro"] .bg-\[\#F59E0B\] {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+  }
+
+  [data-layout="fast-food-retro"] .text-\[\#D97706\],
+  [data-layout="fast-food-retro"] .text-\[\#F59E0B\] {
+    color: #dc2626 !important;
+  }
+
+  [data-layout="fast-food-retro"] .bg-\[\#FEF3C7\] {
+    background-color: #fee2e2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+  }
+
+  [data-layout="fast-food-retro"] .border-\[\#FDE68A\] {
+    border-color: #fecaca !important;
+  }
+}
+
