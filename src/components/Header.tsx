@@ -80,8 +80,8 @@ export const Header: React.FC<HeaderProps> = ({
                   Franquia
                 </span>
               </div>
-              <p className="text-xs font-semibold text-[#636E72] uppercase tracking-widest truncate max-w-[200px] sm:max-w-xs">
-                {settings?.franchiseCode ? `${settings.franchiseCode} • ` : ""}Franquia de Salgados
+              <p className="text-xs font-semibold text-[#636E72] tracking-wide truncate max-w-[200px] sm:max-w-xs">
+                Os melhores sabores de Uberaba
               </p>
             </div>
           </div>

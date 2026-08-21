@@ -318,11 +318,11 @@ let orders: Order[] = [
 ];
 
 let settings: StoreSettings = {
-  storeName: "BALBEC - Unidade Matriz Centro",
-  franchiseCode: "FRANQ-001-SP",
+  storeName: "BALBEC - Os melhores sabores de Uberaba",
+  franchiseCode: "FRANQ-001-MG",
   logoUrl: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=300&q=80",
-  phone: "(11) 3333-4444",
-  address: "Rua das Cozinhas, 120 - Centro, São Paulo/SP",
+  phone: "(34) 3333-4444",
+  address: "Uberaba/MG",
   autoApproveClients: false,
   blueFocusApiUrl: "https://api.bluefocus.com.br/v1/franquias/balbec",
   blueFocusApiKey: "bf_live_9a87d6f5e4c3b2a1",

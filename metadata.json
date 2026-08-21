@@ -1,5 +1,5 @@
 {
-  "name": "BALBEC - Delivery & Autoatendimento Salgados",
+  "name": "BALBEC - Os melhores sabores de Uberaba",
   "description": "Sistema completo de delivery, totem de autoatendimento e painel administrativo para a franquia BALBEC Salgados com integração BlueFocus.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
