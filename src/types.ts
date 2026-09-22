@@ -99,6 +99,23 @@ export interface StoreSettings {
   blueFocusApiKey: string;
   blueFocusAutoSyncMinutes: number;
   paymentMethods: PaymentMethodSetting[];
+
+  // Campos complementares da documentação BlueFocus ERP
+  blueFocusEnvironment?: "PRODUCAO" | "HOMOLOGACAO";
+  blueFocusConnectionType?: "CLOUD" | "LOCAL_GATEWAY";
+  blueFocusCnpj?: string;
+  blueFocusFilialId?: string;
+  blueFocusClientSecret?: string;
+  blueFocusTerminalPdvId?: string;
+  blueFocusOperadorId?: string;
+  blueFocusTabelaPrecoId?: string;
+  blueFocusDepositoId?: string;
+  blueFocusLocalIp?: string;
+  blueFocusLocalPort?: number;
+  blueFocusWebhookUrl?: string;
+  blueFocusWebhookSecret?: string;
+  blueFocusSerieNfce?: string;
+  blueFocusCfopPadrao?: string;
 }
 
 export interface NotificationLog {

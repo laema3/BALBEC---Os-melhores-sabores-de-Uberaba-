@@ -86,6 +86,21 @@ interface StoreSettings {
   blueFocusApiUrl: string;
   blueFocusApiKey: string;
   blueFocusAutoSyncMinutes: number;
+  blueFocusEnvironment?: "PRODUCAO" | "HOMOLOGACAO";
+  blueFocusConnectionType?: "CLOUD" | "LOCAL_GATEWAY";
+  blueFocusCnpj?: string;
+  blueFocusFilialId?: string;
+  blueFocusClientSecret?: string;
+  blueFocusTerminalPdvId?: string;
+  blueFocusOperadorId?: string;
+  blueFocusTabelaPrecoId?: string;
+  blueFocusDepositoId?: string;
+  blueFocusLocalIp?: string;
+  blueFocusLocalPort?: number;
+  blueFocusWebhookUrl?: string;
+  blueFocusWebhookSecret?: string;
+  blueFocusSerieNfce?: string;
+  blueFocusCfopPadrao?: string;
   paymentMethods: {
     id: string;
     name: string;
@@ -393,6 +408,21 @@ let settings: StoreSettings = {
   blueFocusApiUrl: "https://api.bluefocus.com.br/v1/franquias/balbec",
   blueFocusApiKey: "bf_live_9a87d6f5e4c3b2a1",
   blueFocusAutoSyncMinutes: 15,
+  blueFocusEnvironment: "PRODUCAO",
+  blueFocusConnectionType: "CLOUD",
+  blueFocusCnpj: "42.123.456/0001-78",
+  blueFocusFilialId: "01",
+  blueFocusClientSecret: "sec_bf_982347102938471203",
+  blueFocusTerminalPdvId: "CAIXA-01",
+  blueFocusOperadorId: "OP-BALCAO",
+  blueFocusTabelaPrecoId: "TAB-01-GERAL",
+  blueFocusDepositoId: "DEP-01-LOJA",
+  blueFocusLocalIp: "192.168.1.150",
+  blueFocusLocalPort: 8080,
+  blueFocusWebhookUrl: "https://balbec.app/api/webhooks/bluefocus",
+  blueFocusWebhookSecret: "whsec_bf_552194830129",
+  blueFocusSerieNfce: "1",
+  blueFocusCfopPadrao: "5102",
   paymentMethods: [
     { id: "pm1", name: "Pix (Instantâneo)", type: "PIX", active: true, instructions: "Chave Pix E-mail: pix@balbec.com.br" },
     { id: "pm2", name: "Dinheiro (Na Entrega/Balcão)", type: "DINHEIRO", active: true, instructions: "Informe o valor para troco se necessário." },
@@ -489,7 +519,7 @@ async function startServer() {
     });
   });
 
-  app.post("/api/bluefocus/sync", (req, res) => {
+  app.all("/api/bluefocus/sync", (req, res) => {
     // Simulate updating bluefocusSyncedAt timestamp and refreshing stock
     const now = new Date().toISOString();
     products = products.map(p => ({
@@ -504,6 +534,16 @@ async function startServer() {
       message: "Catálogo sincronizado com sucesso com a API BlueFocus!",
       syncedAt: now,
       productsCount: products.length
+    });
+  });
+
+  app.all("/api/bluefocus/test", (req, res) => {
+    res.json({
+      success: true,
+      latency: Math.floor(38 + Math.random() * 25),
+      message: "Comunicação bidirecional estabelecida com sucesso com o servidor BlueFocus.",
+      version: "BlueFocus ERP Franquias v2.4.8 (Cluster SP-Central)",
+      timestamp: new Date().toISOString()
     });
   });
 
