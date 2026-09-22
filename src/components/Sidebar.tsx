@@ -123,16 +123,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       desc: "Controle de acesso, restrições e aprovações",
     },
     {
+      tab: "BLUEFOCUS",
+      label: "Integração BlueFocus",
+      icon: <Sparkles className="w-5 h-5" />,
+      badge: productsCount,
+      badgeColor: "bg-amber-500 text-slate-950",
+      desc: "API, credenciais, sincronização de estoque e testes de conexão",
+    },
+    {
       tab: "CONFIGURACOES",
       label: "Configurações & Franquia",
       icon: <Settings className="w-5 h-5" />,
-      desc: "Logomarca, pagamentos e API BlueFocus",
-    },
-    {
-      tab: "PROPOSTAS",
-      label: "Propostas de Layout",
-      icon: <Palette className="w-5 h-5" />,
-      desc: "Galeria dos 5 designs visuais",
+      desc: "Logomarca, pagamentos e dados da unidade",
     },
   ];
 
@@ -316,23 +318,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Bottom Actions & Quick Preferences */}
         <div className="p-3 border-t border-slate-800/80 bg-slate-950/90 space-y-2 shrink-0">
           
-          {/* Layouts Theme Shortcut */}
-          <button
-            onClick={onOpenLayoutSelector}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 text-left transition-all cursor-pointer group ${
-              !isOpen && "justify-center px-0"
-            }`}
-            title="Alternar entre os 5 Layouts visuais"
-          >
-            <Palette className="w-5 h-5 shrink-0 group-hover:rotate-45 transition-transform" />
-            {isOpen && (
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-amber-400 truncate">5 Propostas de Layout</p>
-                <p className="text-[10px] text-slate-400 truncate">Alterar estilo ao vivo</p>
-              </div>
-            )}
-          </button>
-
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}

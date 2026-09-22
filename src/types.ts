@@ -120,6 +120,7 @@ export type AdminTab =
   | "CATEGORIAS"
   | "CLIENTES"
   | "BLOQUEIO_CLIENTES"
+  | "BLUEFOCUS"
   | "CONFIGURACOES"
   | "PROPOSTAS";
 

@@ -14,7 +14,7 @@ import {
   updateOrderStatus, 
   updateStoreSettings 
 } from "../../services/api";
-import { ProposalsView } from "./ProposalsView";
+import { BlueFocusManager } from "./BlueFocusManager";
 import { ProductsManager } from "./ProductsManager";
 import { CategoriesManager } from "./CategoriesManager";
 import { ClientsManager } from "./ClientsManager";
@@ -488,10 +488,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         />
       )}
 
-      {/* 6. CONFIGURAÇÕES & FRANQUIA */}
+      {/* 6. INTEGRAÇÃO BLUEFOCUS */}
+      {currentTab === "BLUEFOCUS" && (
+        <BlueFocusManager
+          settings={settings}
+          products={products}
+          onRefreshData={onRefreshData}
+        />
+      )}
+
+      {/* 7. CONFIGURAÇÕES & FRANQUIA */}
       {currentTab === "CONFIGURACOES" && (
         <div className="space-y-6">
           
+          {/* BlueFocus Quick Gateway Card inside Configurações */}
+          <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/60 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-amber-500 text-slate-950 rounded-xl shadow-xs">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-sm font-black text-slate-900">Integração BlueFocus ERP</h3>
+                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">
+                    Ativo no Menu
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Gerencie credenciais de API, tokens da franquia, testes de latência e sincronização de catálogo e estoque.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => handleTabChange("BLUEFOCUS")}
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 transition-all cursor-pointer shrink-0 shadow-xs active:scale-95"
+            >
+              <span>Abrir Integração BlueFocus</span>
+              <ChevronRight className="w-4 h-4 text-amber-400" />
+            </button>
+          </div>
+
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
             <div className="flex items-center space-x-2">
               <span className="p-2 bg-slate-100 text-slate-700 rounded-xl">
@@ -641,11 +677,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
         </div>
-      )}
-
-      {/* 7. PROPOSTAS DE LAYOUT */}
-      {currentTab === "PROPOSTAS" && (
-        <ProposalsView />
       )}
 
       {/* Order Detail Modal */}
