@@ -1,4 +1,15 @@
-export type Category = "salgados_fritos" | "salgados_assados" | "combos" | "doces" | "bebidas";
+export type Category = "salgados_fritos" | "salgados_assados" | "combos" | "doces" | "bebidas" | string;
+
+export interface CategoryItem {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  active: boolean;
+  order?: number;
+}
 
 export interface Product {
   id: string;
@@ -13,7 +24,7 @@ export interface Product {
   bluefocusSyncedAt: string;
 }
 
-export type ClientStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type ClientStatus = "PENDING" | "APPROVED" | "REJECTED" | "BLOCKED";
 
 export interface ClientAddress {
   street: string;
@@ -102,6 +113,15 @@ export interface NotificationLog {
 }
 
 export type AppMode = "DELIVERY" | "TOTEM" | "ADMIN" | "CALL_DISPLAY";
+
+export type AdminTab = 
+  | "PEDIDOS"
+  | "PRODUTOS"
+  | "CATEGORIAS"
+  | "CLIENTES"
+  | "BLOQUEIO_CLIENTES"
+  | "CONFIGURACOES"
+  | "PROPOSTAS";
 
 export type LayoutThemeId = 
   | "balbec-classic" 

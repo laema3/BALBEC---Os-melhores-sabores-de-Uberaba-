@@ -1,7 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { AppMode, Product, Client, Order, StoreSettings, NotificationLog, LayoutThemeId } from "./types";
+import { 
+  AppMode, 
+  Product, 
+  Client, 
+  Order, 
+  StoreSettings, 
+  NotificationLog, 
+  LayoutThemeId, 
+  AdminTab, 
+  CategoryItem 
+} from "./types";
 import { 
   getProducts, 
+  getCategories, 
   getClients, 
   getOrders, 
   getStoreSettings, 
@@ -11,6 +22,7 @@ import {
 } from "./services/api";
 import { playNewOrderAlert } from "./utils/audio";
 import { Header } from "./components/Header";
+import { Sidebar } from "./components/Sidebar";
 import { CatalogView } from "./components/delivery/CatalogView";
 import { CartDrawer } from "./components/delivery/CartDrawer";
 import { ClientRegisterModal } from "./components/client/ClientRegisterModal";
@@ -22,7 +34,9 @@ import { LayoutThemeSelector } from "./components/LayoutThemeSelector";
 import { Sparkles, Check, Phone, MapPin } from "lucide-react";
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<AppMode>("DELIVERY");
+  const [currentMode, setCurrentMode] = useState<AppMode>("ADMIN");
+  const [adminTab, setAdminTab] = useState<AdminTab>("PEDIDOS");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Visual Layout & Theme Choice (5 Presets)
   const [layoutTheme, setLayoutTheme] = useState<LayoutThemeId>(() => {
@@ -37,6 +51,7 @@ export default function App() {
 
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState<StoreSettings | null>(null);
@@ -55,8 +70,9 @@ export default function App() {
   const [isSyncingBlueFocus, setIsSyncingBlueFocus] = useState(false);
 
   const loadAllData = useCallback(async () => {
-    const [pList, cList, oList, sData, nList] = await Promise.all([
+    const [pList, catList, cList, oList, sData, nList] = await Promise.all([
       getProducts(),
+      getCategories(),
       getClients(),
       getOrders(),
       getStoreSettings(),
@@ -64,16 +80,12 @@ export default function App() {
     ]);
 
     setProducts(pList);
+    setCategories(catList);
     setClients(cList);
     setOrders(oList);
     if (sData) setSettings(sData);
     setNotifications(nList);
-
-    // If no client selected yet, require login
-    if (!currentClient) {
-      setIsLoginModalOpen(true);
-    }
-  }, [currentClient]);
+  }, []);
 
   useEffect(() => {
     loadAllData();
@@ -140,11 +152,12 @@ export default function App() {
 
   const pendingOrdersCount = orders.filter((o) => o.status === "AGUARDANDO").length;
   const pendingClientsCount = clients.filter((c) => c.status === "PENDING").length;
+  const blockedClientsCount = clients.filter((c) => c.status === "BLOCKED").length;
 
   return (
     <div 
       data-layout={layoutTheme}
-      className={`min-h-screen flex flex-col font-sans selection:bg-[#F59E0B] selection:text-slate-950 transition-colors duration-300 ${
+      className={`min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300 ${
         layoutTheme === "dark-industrial" 
           ? "bg-[#090A0F] text-[#F8FAFC]" 
           : layoutTheme === "b2b-atacado"
@@ -153,81 +166,144 @@ export default function App() {
           ? "bg-[#FAF7F2] text-[#292524]"
           : layoutTheme === "fast-food-retro"
           ? "bg-[#FFFBF0] text-[#18181B]"
-          : "bg-[#F8F9FA] text-[#2D3436]"
+          : "bg-slate-50 text-slate-800"
       }`}
     >
-      
-      {/* Top Header Navigation */}
-      <Header
+      {/* Left Sidebar Navigation */}
+      <Sidebar
         currentMode={currentMode}
         onModeChange={(m) => setCurrentMode(m)}
-        cartCount={totalCartBadgeCount}
-        onOpenCart={() => {
-          if (!currentClient || currentClient.status !== "APPROVED") {
-            setIsLoginModalOpen(true);
-          } else {
-            setIsCartOpen(true);
-          }
+        adminTab={adminTab}
+        onAdminTabChange={(tab) => {
+          setAdminTab(tab);
+          if (currentMode !== "ADMIN") setCurrentMode("ADMIN");
         }}
-        settings={settings}
-        currentClient={currentClient}
-        onOpenClientModal={() => setIsClientModalOpen(true)}
-        onLogout={() => setCurrentClient(null)}
-        pendingClientsCount={pendingClientsCount}
         pendingOrdersCount={pendingOrdersCount}
+        pendingClientsCount={pendingClientsCount}
+        blockedClientsCount={blockedClientsCount}
+        productsCount={products.length}
+        categoriesCount={categories.length}
+        clientsCount={clients.length}
+        isOpen={isSidebarOpen}
+        onToggleOpen={() => setIsSidebarOpen(!isSidebarOpen)}
         onOpenLayoutSelector={() => setIsLayoutSelectorOpen(true)}
+        settings={settings}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-        
-        {/* Delivery (Web/Casa) Mode */}
-        {currentMode === "DELIVERY" && (
-          <CatalogView
-            products={products}
-            onAddToCart={handleAddToCart}
-            cartItemQuantities={cartItemQuantities}
-            onSyncBlueFocus={handleSyncBlueFocus}
-            isSyncing={isSyncingBlueFocus}
-            currentClient={currentClient}
-            onOpenLogin={() => setIsLoginModalOpen(true)}
-            onOpenRegister={() => setIsClientModalOpen(true)}
-          />
-        )}
+      {/* Main Layout Container adjusted for Sidebar */}
+      <div 
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          isSidebarOpen ? "lg:pl-72" : "lg:pl-20"
+        }`}
+      >
+        {/* Top Header */}
+        <Header
+          currentMode={currentMode}
+          onModeChange={(m) => setCurrentMode(m)}
+          cartCount={totalCartBadgeCount}
+          onOpenCart={() => {
+            if (!currentClient || currentClient.status !== "APPROVED") {
+              setIsLoginModalOpen(true);
+            } else {
+              setIsCartOpen(true);
+            }
+          }}
+          settings={settings}
+          currentClient={currentClient}
+          onOpenClientModal={() => setIsClientModalOpen(true)}
+          onLogout={() => setCurrentClient(null)}
+          pendingClientsCount={pendingClientsCount}
+          pendingOrdersCount={pendingOrdersCount}
+          onOpenLayoutSelector={() => setIsLayoutSelectorOpen(true)}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          isSidebarOpen={isSidebarOpen}
+        />
 
-        {/* Totem / Tablet na Loja Mode */}
-        {currentMode === "TOTEM" && (
-          <TotemKioskView
-            products={products}
-            onOrderCreated={() => loadAllData()}
-            currentClient={currentClient}
-            onOpenLogin={() => setIsLoginModalOpen(true)}
-            onClientLoginSuccess={(client) => setCurrentClient(client)}
-            onClearClient={() => setCurrentClient(null)}
-          />
-        )}
+        {/* View Port Content */}
+        <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          
+          {/* Delivery (Web/Casa) Mode */}
+          {currentMode === "DELIVERY" && (
+            <CatalogView
+              products={products}
+              onAddToCart={handleAddToCart}
+              cartItemQuantities={cartItemQuantities}
+              onSyncBlueFocus={handleSyncBlueFocus}
+              isSyncing={isSyncingBlueFocus}
+              currentClient={currentClient}
+              onOpenLogin={() => setIsLoginModalOpen(true)}
+              onOpenRegister={() => setIsClientModalOpen(true)}
+            />
+          )}
 
-        {/* Monitor TV Chamada Mode */}
-        {currentMode === "CALL_DISPLAY" && (
-          <CallDisplayView
-            orders={orders}
-            storeName={settings?.storeName}
-          />
-        )}
+          {/* Totem / Tablet na Loja Mode */}
+          {currentMode === "TOTEM" && (
+            <TotemKioskView
+              products={products}
+              onOrderCreated={() => loadAllData()}
+              currentClient={currentClient}
+              onOpenLogin={() => setIsLoginModalOpen(true)}
+              onClientLoginSuccess={(client) => setCurrentClient(client)}
+              onClearClient={() => setCurrentClient(null)}
+            />
+          )}
 
-        {/* Admin Dashboard Mode */}
-        {currentMode === "ADMIN" && (
-          <AdminDashboard
-            orders={orders}
-            clients={clients}
-            settings={settings}
-            products={products}
-            notifications={notifications}
-            onRefreshData={loadAllData}
-          />
-        )}
+          {/* Monitor TV Chamada Mode */}
+          {currentMode === "CALL_DISPLAY" && (
+            <CallDisplayView
+              orders={orders}
+              storeName={settings?.storeName}
+            />
+          )}
 
-      </main>
+          {/* Admin Dashboard Mode */}
+          {currentMode === "ADMIN" && (
+            <AdminDashboard
+              orders={orders}
+              clients={clients}
+              settings={settings}
+              products={products}
+              categories={categories}
+              notifications={notifications}
+              onRefreshData={loadAllData}
+              activeTab={adminTab}
+              onActiveTabChange={(t) => setAdminTab(t)}
+            />
+          )}
+
+        </main>
+
+        {/* Footer */}
+        <footer className="mt-auto bg-slate-900 text-slate-400 py-5 px-6 sm:px-8 text-xs font-semibold border-t border-slate-800">
+          <div className="w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500 font-black text-slate-950 flex items-center justify-center text-base shadow-sm">
+                B
+              </div>
+              <div>
+                <p className="font-bold text-white text-sm tracking-tight uppercase">
+                  BALBEC — OS MELHORES SABORES DE UBERABA
+                </p>
+                <p className="text-[11px] text-slate-400 font-normal">
+                  {settings?.address || "Av. Leopoldino de Oliveira, 1500 - Centro, Uberaba - MG"} • Tel: {settings?.phone || "(34) 3333-1000"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4 text-[11px]">
+              <span className="flex items-center space-x-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-emerald-400 font-bold">SISTEMA ONLINE</span>
+              </span>
+              <span className="text-slate-700">|</span>
+              <span className="text-amber-400 flex items-center space-x-1 font-bold">
+                <Sparkles className="w-3.5 h-3.5 inline" />
+                <span>BLUEFOCUS INTEGRADO</span>
+              </span>
+            </div>
+          </div>
+        </footer>
+      </div>
 
       {/* Cart & Checkout Drawer (Delivery) */}
       <CartDrawer
@@ -267,34 +343,6 @@ export default function App() {
         }}
         onSwitchToRegister={() => setIsClientModalOpen(true)}
       />
-
-      {/* Footer Branding - Yellow Brand Theme */}
-      <footer className="mt-auto bg-[#2D3436] text-[#B2BEC3] py-6 px-8 text-[11px] font-bold uppercase tracking-widest border-t border-[#E9ECEF]">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-[#F59E0B] font-black text-slate-950 flex items-center justify-center text-lg tracking-tighter shadow-sm">
-              B
-            </div>
-            <div>
-              <p className="font-bold text-white text-sm tracking-tight uppercase">
-                BALBEC — FRANQUIA DE SALGADOS
-              </p>
-              <p className="text-[11px] text-[#B2BEC3] font-medium leading-tight lowercase tracking-normal">
-                {settings?.address || "Rua das Cozinhas, 120 - Centro"} • {settings?.phone || "(11) 3333-4444"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-6 text-[11px]">
-            <span>STATUS DO SISTEMA: <span className="text-[#55EFC4]">● ONLINE</span></span>
-            <span className="text-slate-600">|</span>
-            <span className="text-[#F59E0B] flex items-center space-x-1">
-              <Sparkles className="w-3.5 h-3.5 inline" />
-              <span>INTEGRAÇÃO BLUEFOCUS ATIVA</span>
-            </span>
-          </div>
-        </div>
-      </footer>
 
       {/* Layout & Theme Selector (5 Presets Switcher) */}
       <LayoutThemeSelector

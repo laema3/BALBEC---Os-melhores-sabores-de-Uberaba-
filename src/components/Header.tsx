@@ -12,7 +12,9 @@ import {
   Clock, 
   XCircle,
   UserCheck,
-  Palette
+  Palette,
+  Menu,
+  Flame
 } from "lucide-react";
 import { getIsMuted, setMuted } from "../utils/audio";
 
@@ -28,6 +30,8 @@ interface HeaderProps {
   pendingClientsCount: number;
   pendingOrdersCount: number;
   onOpenLayoutSelector?: () => void;
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,6 +46,8 @@ export const Header: React.FC<HeaderProps> = ({
   pendingClientsCount,
   pendingOrdersCount,
   onOpenLayoutSelector,
+  onToggleSidebar,
+  isSidebarOpen,
 }) => {
   const [muted, setMutedState] = React.useState(getIsMuted());
 
@@ -51,158 +57,163 @@ export const Header: React.FC<HeaderProps> = ({
     setMutedState(next);
   };
 
-  const logoImage = settings?.logoUrl || "https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=300&q=80";
-  const storeTitle = settings?.storeName || "BALBEC Salgados";
-
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E9ECEF] text-[#2D3436] shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 text-slate-900 shadow-xs">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-18">
           
-          {/* Logo & Brand Info */}
-          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => onModeChange("DELIVERY")}>
-            <div className="relative group">
-              <div className="w-12 h-12 bg-[#F59E0B] rounded-xl flex items-center justify-center text-slate-950 font-black text-2xl tracking-tighter shadow-sm group-hover:scale-105 transition-transform duration-200">
-                B
-              </div>
-              <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F59E0B] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-[#00B894] text-[9px] font-black items-center justify-center text-white">✓</span>
-              </span>
-            </div>
+          {/* Left: Sidebar Hamburger + Logo & Brand */}
+          <div className="flex items-center space-x-3">
+            {onToggleSidebar && (
+              <button
+                onClick={onToggleSidebar}
+                className="p-2.5 rounded-xl hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                title="Menu Lateral (Produtos, Categorias, Clientes, Bloqueio)"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
 
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-2xl font-extrabold tracking-tight text-[#2D3436] uppercase">
-                  BALBEC
-                </h1>
-                <span className="text-[10px] uppercase tracking-widest font-extrabold px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A]">
-                  Franquia
-                </span>
+            <div 
+              className="flex items-center space-x-3 cursor-pointer select-none" 
+              onClick={() => onModeChange("DELIVERY")}
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-slate-950 font-black shadow-sm shrink-0">
+                <Flame className="w-6 h-6 text-slate-950" />
               </div>
-              <p className="text-xs font-semibold text-[#636E72] tracking-wide truncate max-w-[200px] sm:max-w-xs">
-                Os melhores sabores de Uberaba
-              </p>
+
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">
+                    BALBEC
+                  </h1>
+                  <span className="text-[10px] uppercase tracking-widest font-black px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                    Uberaba/MG
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-slate-500 truncate max-w-[200px] sm:max-w-xs leading-none mt-0.5">
+                  Os melhores sabores de Uberaba
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Mode Navigation Bar */}
-          <div className="hidden lg:flex items-center bg-[#F8F9FA] p-1.5 rounded-2xl border border-[#E9ECEF] shadow-inner">
+          {/* Center: Mode Navigation Bar */}
+          <div className="hidden lg:flex items-center bg-slate-100/90 p-1 rounded-2xl border border-slate-200">
             <button
               onClick={() => onModeChange("DELIVERY")}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentMode === "DELIVERY"
-                  ? "bg-[#F59E0B] text-slate-950 shadow-sm scale-[1.02]"
-                  : "text-[#636E72] hover:bg-white hover:text-[#2D3436]"
+                  ? "bg-amber-500 text-slate-950 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
               }`}
             >
               <Smartphone className="w-4 h-4" />
-              <span>Delivery (Web/Casa)</span>
+              <span>Delivery Online</span>
             </button>
 
             <button
               onClick={() => onModeChange("TOTEM")}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentMode === "TOTEM"
-                  ? "bg-[#F59E0B] text-slate-950 shadow-sm scale-[1.02]"
-                  : "text-[#636E72] hover:bg-white hover:text-[#2D3436]"
+                  ? "bg-amber-500 text-slate-950 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
               }`}
             >
               <Monitor className="w-4 h-4" />
-              <span>Totem / Tablet (Loja)</span>
+              <span>Totem Loja</span>
             </button>
 
             <button
               onClick={() => onModeChange("CALL_DISPLAY")}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentMode === "CALL_DISPLAY"
-                  ? "bg-[#F59E0B] text-slate-950 shadow-sm scale-[1.02]"
-                  : "text-[#636E72] hover:bg-white hover:text-[#2D3436]"
+                  ? "bg-amber-500 text-slate-950 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
               }`}
             >
               <Tv className="w-4 h-4" />
-              <span>Monitor TV Chamada</span>
+              <span>TV de Senhas</span>
             </button>
 
             <button
               onClick={() => onModeChange("ADMIN")}
-              className={`relative flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-200 ${
+              className={`relative flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentMode === "ADMIN"
-                  ? "bg-[#F59E0B] text-slate-950 shadow-sm scale-[1.02]"
-                  : "text-[#636E72] hover:bg-white hover:text-[#2D3436]"
+                  ? "bg-amber-500 text-slate-950 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
               }`}
             >
               <Store className="w-4 h-4" />
               <span>Painel Admin</span>
               
-              {/* Badge for pending alerts in Admin */}
               {(pendingOrdersCount > 0 || pendingClientsCount > 0) && (
-                <span className="flex h-5 min-w-5 px-1 bg-[#D97706] text-white rounded-full text-[10px] font-black items-center justify-center animate-pulse shadow-sm">
+                <span className="flex h-4 min-w-4 px-1 bg-rose-600 text-white rounded-full text-[9px] font-black items-center justify-center animate-pulse">
                   {pendingOrdersCount + pendingClientsCount}
                 </span>
               )}
             </button>
           </div>
 
-          {/* Right Action Controls */}
-          <div className="flex items-center space-x-3">
+          {/* Right: Actions */}
+          <div className="flex items-center space-x-2.5">
             
-            {/* Layout / Theme Selector Button */}
+            {/* Layouts Preset Selector */}
             {onOpenLayoutSelector && (
               <button
                 onClick={onOpenLayoutSelector}
-                title="Ver e Alternar entre os 5 Layouts"
-                className="flex items-center space-x-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 rounded-xl text-xs font-black shadow-xs transition-transform active:scale-95 cursor-pointer"
+                title="Alternar entre as 5 Propostas de Layout"
+                className="flex items-center space-x-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-amber-400 rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 <Palette className="w-4 h-4" />
-                <span className="hidden md:inline">5 Layouts</span>
+                <span className="hidden sm:inline">5 Layouts</span>
               </button>
             )}
 
             {/* Audio Toggle */}
             <button
               onClick={toggleSound}
-              title={muted ? "Ativar efeitos sonoros" : "Silenciar som"}
-              className={`p-2.5 rounded-xl border transition-colors ${
+              title={muted ? "Ativar som de alertas" : "Silenciar som"}
+              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                 muted
-                  ? "bg-[#F8F9FA] text-[#B2BEC3] border-[#E9ECEF] hover:text-[#636E72]"
-                  : "bg-[#FEF3C7] text-[#D97706] border-[#FDE68A] hover:bg-[#FDE68A]"
+                  ? "bg-slate-100 text-slate-400 border-slate-200 hover:text-slate-600"
+                  : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
               }`}
             >
-              {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 animate-pulse" />}
+              {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-emerald-600 animate-pulse" />}
             </button>
 
-            {/* Client Status Badge / Register Button (Delivery mode) */}
+            {/* Client Login/Profile Button (Delivery Mode) */}
             {currentMode === "DELIVERY" && (
               <div className="hidden sm:flex items-center space-x-2">
                 <button
                   onClick={onOpenClientModal}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                     !currentClient
-                      ? "bg-[#FEF3C7] text-[#D97706] border-[#FDE68A] hover:bg-[#FDE68A]"
+                      ? "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100"
                       : currentClient.status === "APPROVED"
-                      ? "bg-[#E6F9F5] text-[#00B894] border-[#00B894]/30"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                       : currentClient.status === "PENDING"
-                      ? "bg-[#FEF3C7] text-[#D97706] border-[#FDE68A] animate-pulse"
-                      : "bg-red-50 text-red-600 border-red-200"
+                      ? "bg-amber-50 text-amber-800 border-amber-200 animate-pulse"
+                      : "bg-rose-50 text-rose-700 border-rose-200"
                   }`}
                 >
                   {!currentClient ? (
                     <>
-                      <UserCheck className="w-4 h-4 text-[#D97706]" />
-                      <span>Cadastrar / Entrar</span>
+                      <UserCheck className="w-4 h-4 text-amber-700" />
+                      <span>Entrar / Cadastrar</span>
                     </>
                   ) : (
                     <>
-                      {currentClient.status === "APPROVED" && <CheckCircle2 className="w-4 h-4 text-[#00B894]" />}
-                      {currentClient.status === "PENDING" && <Clock className="w-4 h-4 text-[#D97706]" />}
-                      {currentClient.status === "REJECTED" && <XCircle className="w-4 h-4 text-red-500" />}
+                      {currentClient.status === "APPROVED" && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                      {currentClient.status === "PENDING" && <Clock className="w-4 h-4 text-amber-600" />}
+                      {currentClient.status === "BLOCKED" && <XCircle className="w-4 h-4 text-rose-600" />}
                       <div className="text-left">
-                        <p className="font-black leading-none text-[#2D3436]">{currentClient.name}</p>
-                        <p className="text-[10px] text-[#636E72] leading-tight">
-                          {currentClient.status === "APPROVED" && `CNPJ: ${currentClient.cnpj || "Aprovado"}`}
-                          {currentClient.status === "PENDING" && "Em Análise"}
-                          {currentClient.status === "REJECTED" && "Não Aprovado"}
+                        <p className="font-bold leading-none text-slate-900 truncate max-w-[120px]">{currentClient.name}</p>
+                        <p className="text-[10px] text-slate-500 leading-tight">
+                          {currentClient.status === "APPROVED" && "Cliente Liberado"}
+                          {currentClient.status === "PENDING" && "Pendente"}
+                          {currentClient.status === "BLOCKED" && "Bloqueado"}
                         </p>
                       </div>
                     </>
@@ -212,8 +223,8 @@ export const Header: React.FC<HeaderProps> = ({
                 {currentClient && (
                   <button
                     onClick={onLogout}
-                    className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-black uppercase tracking-wider transition-colors"
-                    title="Desconectar / Sair da conta"
+                    className="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    title="Desconectar da conta"
                   >
                     Sair
                   </button>
@@ -225,28 +236,29 @@ export const Header: React.FC<HeaderProps> = ({
             {currentMode === "DELIVERY" && (
               <button
                 onClick={onOpenCart}
-                className="relative flex items-center space-x-2 px-4 py-2.5 bg-[#00B894] hover:bg-[#00A884] text-white font-extrabold rounded-xl shadow-md active:scale-95 transition-all"
+                className="relative flex items-center space-x-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm active:scale-95 transition-all cursor-pointer"
               >
-                <ShoppingBag className="w-5 h-5 text-white" />
-                <span className="hidden sm:inline text-xs uppercase tracking-wider">Carrinho</span>
+                <ShoppingBag className="w-4 h-4 text-white" />
+                <span className="hidden sm:inline text-xs">Carrinho</span>
                 {cartCount > 0 && (
-                  <span className="bg-white text-[#00B894] text-xs font-black px-2 py-0.5 rounded-full border border-white animate-bounce">
+                  <span className="bg-white text-emerald-800 text-xs font-black px-1.5 py-0.2 rounded-full shadow-xs">
                     {cartCount}
                   </span>
                 )}
               </button>
             )}
+
           </div>
 
         </div>
       </div>
 
       {/* Mobile Mode Switcher Bar */}
-      <div className="lg:hidden bg-white px-2 py-2 border-t border-[#E9ECEF] flex items-center justify-around overflow-x-auto text-xs font-bold">
+      <div className="lg:hidden bg-slate-50 px-2 py-2 border-t border-slate-200 flex items-center justify-around overflow-x-auto text-xs font-bold">
         <button
           onClick={() => onModeChange("DELIVERY")}
           className={`px-3 py-1.5 rounded-lg flex items-center space-x-1 ${
-            currentMode === "DELIVERY" ? "bg-[#F59E0B] text-slate-950 font-black" : "text-[#636E72]"
+            currentMode === "DELIVERY" ? "bg-amber-500 text-slate-950 font-black" : "text-slate-600"
           }`}
         >
           <Smartphone className="w-3.5 h-3.5" />
@@ -255,7 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onModeChange("TOTEM")}
           className={`px-3 py-1.5 rounded-lg flex items-center space-x-1 ${
-            currentMode === "TOTEM" ? "bg-[#F59E0B] text-slate-950 font-black" : "text-[#636E72]"
+            currentMode === "TOTEM" ? "bg-amber-500 text-slate-950 font-black" : "text-slate-600"
           }`}
         >
           <Monitor className="w-3.5 h-3.5" />
@@ -264,22 +276,22 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onModeChange("CALL_DISPLAY")}
           className={`px-3 py-1.5 rounded-lg flex items-center space-x-1 ${
-            currentMode === "CALL_DISPLAY" ? "bg-[#F59E0B] text-slate-950 font-black" : "text-[#636E72]"
+            currentMode === "CALL_DISPLAY" ? "bg-amber-500 text-slate-950 font-black" : "text-slate-600"
           }`}
         >
           <Tv className="w-3.5 h-3.5" />
-          <span>TV Chamada</span>
+          <span>TV Senhas</span>
         </button>
         <button
           onClick={() => onModeChange("ADMIN")}
           className={`px-3 py-1.5 rounded-lg flex items-center space-x-1 relative ${
-            currentMode === "ADMIN" ? "bg-[#F59E0B] text-slate-950 font-black" : "text-[#636E72]"
+            currentMode === "ADMIN" ? "bg-amber-500 text-slate-950 font-black" : "text-slate-600"
           }`}
         >
           <Store className="w-3.5 h-3.5" />
           <span>Admin</span>
           {(pendingOrdersCount > 0 || pendingClientsCount > 0) && (
-            <span className="w-2 h-2 bg-[#D97706] rounded-full animate-ping"></span>
+            <span className="w-2 h-2 bg-rose-600 rounded-full animate-ping"></span>
           )}
         </button>
       </div>

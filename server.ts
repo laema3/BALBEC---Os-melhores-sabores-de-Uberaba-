@@ -2,6 +2,17 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 
+interface CategoryItem {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  active: boolean;
+  order?: number;
+}
+
 interface Product {
   id: string;
   code: string;
@@ -9,7 +20,7 @@ interface Product {
   description: string;
   price: number;
   stock: number;
-  category: "salgados_fritos" | "salgados_assados" | "combos" | "doces" | "bebidas";
+  category: "salgados_fritos" | "salgados_assados" | "combos" | "doces" | "bebidas" | string;
   image: string;
   isAvailable: boolean;
   bluefocusSyncedAt: string;
@@ -31,9 +42,11 @@ interface Client {
     complement?: string;
     city: string;
   };
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "BLOCKED";
   createdAt: string;
   notes?: string;
+  blockedAt?: string;
+  blockReason?: string;
 }
 
 interface OrderItem {
@@ -317,6 +330,59 @@ let orders: Order[] = [
   }
 ];
 
+let categories: CategoryItem[] = [
+  {
+    id: "cat_1",
+    slug: "salgados_fritos",
+    name: "Salgados Fritos",
+    description: "Coxinhas, kibes, bolinhas de queijo douradas e crocantes na hora.",
+    icon: "Flame",
+    color: "#F59E0B",
+    active: true,
+    order: 1,
+  },
+  {
+    id: "cat_2",
+    slug: "salgados_assados",
+    name: "Salgados Assados",
+    description: "Empadas gourmet, esfihas abertas, pães de queijo e folhados artesanais.",
+    icon: "Sparkles",
+    color: "#10B981",
+    active: true,
+    order: 2,
+  },
+  {
+    id: "cat_3",
+    slug: "combos",
+    name: "Combos & Centos",
+    description: "Centos de salgados para festas, confraternizações e kits lanche.",
+    icon: "Package",
+    color: "#8B5CF6",
+    active: true,
+    order: 3,
+  },
+  {
+    id: "cat_4",
+    slug: "doces",
+    name: "Doces & Sobremesas",
+    description: "Churros de doce de leite, brigadeiros artesanais e sobremesas finas.",
+    icon: "Heart",
+    color: "#EC4899",
+    active: true,
+    order: 4,
+  },
+  {
+    id: "cat_5",
+    slug: "bebidas",
+    name: "Bebidas & Sucos",
+    description: "Sucos naturais da fruta, refrigerantes e água mineral gelada.",
+    icon: "Coffee",
+    color: "#06B6D4",
+    active: true,
+    order: 5,
+  }
+];
+
 let settings: StoreSettings = {
   storeName: "BALBEC - Os melhores sabores de Uberaba",
   franchiseCode: "FRANQ-001-MG",
@@ -359,6 +425,58 @@ async function startServer() {
   // API Routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", name: "BALBEC API Service", version: "1.0.0" });
+  });
+
+  // Category Management
+  app.get("/api/categories", (req, res) => {
+    res.json({ success: true, data: categories });
+  });
+
+  app.post("/api/categories", (req, res) => {
+    const { name, slug, description, icon, color, active } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Nome da categoria é obrigatório." });
+    }
+    const autoSlug = slug || name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "_");
+    const newCat: CategoryItem = {
+      id: "cat_" + Date.now(),
+      slug: autoSlug,
+      name,
+      description: description || "",
+      icon: icon || "Tag",
+      color: color || "#F59E0B",
+      active: active !== false,
+      order: categories.length + 1
+    };
+    categories.push(newCat);
+    res.status(201).json({ success: true, category: newCat });
+  });
+
+  app.put("/api/categories/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, slug, description, icon, color, active, order } = req.body;
+    const cat = categories.find(c => c.id === id);
+    if (!cat) {
+      return res.status(404).json({ error: "Categoria não encontrada." });
+    }
+    if (name) cat.name = name;
+    if (slug) cat.slug = slug;
+    if (description !== undefined) cat.description = description;
+    if (icon) cat.icon = icon;
+    if (color) cat.color = color;
+    if (active !== undefined) cat.active = active;
+    if (order !== undefined) cat.order = Number(order);
+    res.json({ success: true, category: cat });
+  });
+
+  app.delete("/api/categories/:id", (req, res) => {
+    const { id } = req.params;
+    const index = categories.findIndex(c => c.id === id);
+    if (index === -1) {
+      return res.status(404).json({ error: "Categoria não encontrada." });
+    }
+    const deleted = categories.splice(index, 1)[0];
+    res.json({ success: true, category: deleted });
   });
 
   // BlueFocus API Proxy / Sync Endpoints
@@ -412,6 +530,35 @@ async function startServer() {
     res.status(201).json({ success: true, product: newProd });
   });
 
+  app.put("/api/bluefocus/products/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, description, price, stock, category, image, code, isAvailable } = req.body;
+    const prod = products.find(p => p.id === id);
+    if (!prod) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+    if (name) prod.name = name;
+    if (description !== undefined) prod.description = description;
+    if (price !== undefined) prod.price = Number(price);
+    if (stock !== undefined) prod.stock = Number(stock);
+    if (category) prod.category = category;
+    if (image) prod.image = image;
+    if (code) prod.code = code;
+    if (isAvailable !== undefined) prod.isAvailable = isAvailable;
+    prod.bluefocusSyncedAt = new Date().toISOString();
+    res.json({ success: true, product: prod });
+  });
+
+  app.delete("/api/bluefocus/products/:id", (req, res) => {
+    const { id } = req.params;
+    const index = products.findIndex(p => p.id === id);
+    if (index === -1) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+    const deleted = products.splice(index, 1)[0];
+    res.json({ success: true, product: deleted });
+  });
+
   app.patch("/api/bluefocus/products/:id/stock", (req, res) => {
     const { id } = req.params;
     const { stock } = req.body;
@@ -424,7 +571,19 @@ async function startServer() {
     res.json({ success: true, product: prod });
   });
 
-  // Client Management & Approval Queue
+  app.patch("/api/bluefocus/products/:id/availability", (req, res) => {
+    const { id } = req.params;
+    const { isAvailable } = req.body;
+    const prod = products.find(p => p.id === id);
+    if (!prod) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+    prod.isAvailable = Boolean(isAvailable);
+    prod.bluefocusSyncedAt = new Date().toISOString();
+    res.json({ success: true, product: prod });
+  });
+
+  // Client Management, Approval & Blocking
   app.get("/api/clients", (req, res) => {
     res.json({ success: true, data: clients });
   });
@@ -440,6 +599,12 @@ async function startServer() {
     
     if (!client) {
       return res.status(401).json({ error: "CNPJ ou senha incorretos." });
+    }
+
+    if (client.status === "BLOCKED") {
+      return res.status(403).json({ 
+        error: `Acesso Bloqueado: Este cliente está bloqueado no sistema da BALBEC. Motivo: ${client.blockReason || "Restrição administrativa"}. Entre em contato com a gerência.`
+      });
     }
 
     res.json({ success: true, client });
@@ -482,6 +647,31 @@ async function startServer() {
     res.status(201).json({ success: true, client: newClient });
   });
 
+  app.put("/api/clients/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, phone, email, cnpj, password, address, minDailyOrders, minWeeklyOrders, status, notes } = req.body;
+
+    const client = clients.find(c => c.id === id);
+    if (!client) {
+      return res.status(404).json({ error: "Cliente não encontrado." });
+    }
+
+    if (name) client.name = name;
+    if (phone) client.phone = phone;
+    if (email !== undefined) client.email = email;
+    if (cnpj) client.cnpj = cnpj;
+    if (password) client.password = password;
+    if (address) client.address = address;
+    if (minDailyOrders !== undefined) client.minDailyOrders = Number(minDailyOrders);
+    if (minWeeklyOrders !== undefined) client.minWeeklyOrders = Number(minWeeklyOrders);
+    if (status && ["APPROVED", "REJECTED", "PENDING", "BLOCKED"].includes(status)) {
+      client.status = status;
+    }
+    if (notes !== undefined) client.notes = notes;
+
+    res.json({ success: true, client });
+  });
+
   app.patch("/api/clients/:id/approval", (req, res) => {
     const { id } = req.params;
     const { status, notes } = req.body;
@@ -491,7 +681,7 @@ async function startServer() {
       return res.status(404).json({ error: "Cliente não encontrado." });
     }
 
-    if (!["APPROVED", "REJECTED", "PENDING"].includes(status)) {
+    if (!["APPROVED", "REJECTED", "PENDING", "BLOCKED"].includes(status)) {
       return res.status(400).json({ error: "Status inválido." });
     }
 
@@ -499,6 +689,40 @@ async function startServer() {
     if (notes !== undefined) client.notes = notes;
 
     res.json({ success: true, client });
+  });
+
+  app.patch("/api/clients/:id/block", (req, res) => {
+    const { id } = req.params;
+    const { block, reason } = req.body;
+
+    const client = clients.find(c => c.id === id);
+    if (!client) {
+      return res.status(404).json({ error: "Cliente não encontrado." });
+    }
+
+    if (block) {
+      client.status = "BLOCKED";
+      client.blockedAt = new Date().toISOString();
+      client.blockReason = reason || "Bloqueio manual realizado pela gerência";
+      client.notes = (client.notes ? client.notes + " | " : "") + `[BLOQUEADO em ${new Date().toLocaleDateString()}: ${client.blockReason}]`;
+    } else {
+      client.status = "APPROVED";
+      client.blockedAt = undefined;
+      client.blockReason = undefined;
+      client.notes = (client.notes ? client.notes + " | " : "") + `[DESBLOQUEADO em ${new Date().toLocaleDateString()}]`;
+    }
+
+    res.json({ success: true, client });
+  });
+
+  app.delete("/api/clients/:id", (req, res) => {
+    const { id } = req.params;
+    const index = clients.findIndex(c => c.id === id);
+    if (index === -1) {
+      return res.status(404).json({ error: "Cliente não encontrado." });
+    }
+    const deleted = clients.splice(index, 1)[0];
+    res.json({ success: true, client: deleted });
   });
 
   app.patch("/api/clients/:id/minimums", (req, res) => {
@@ -526,6 +750,16 @@ async function startServer() {
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "O pedido deve conter pelo menos um item." });
+    }
+
+    if (clientPhone) {
+      const cleanPhone = clientPhone.replace(/\D/g, "");
+      const matchedClient = clients.find(c => c.phone && c.phone.replace(/\D/g, "") === cleanPhone);
+      if (matchedClient && matchedClient.status === "BLOCKED") {
+        return res.status(403).json({
+          error: `Não foi possível gerar o pedido: O cadastro (${matchedClient.name}) está BLOQUEADO pela administração da BALBEC. Motivo: ${matchedClient.blockReason || "Restrição cadastral"}.`
+        });
+      }
     }
 
     // Validate and reduce stock
